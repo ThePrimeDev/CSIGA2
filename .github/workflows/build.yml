@@ -71,6 +71,7 @@ jobs:
           libxcursor-dev \
           libxrandr-dev \
           libxinerama-dev \
+          libxss-dev \
           pkg-config \
           libavformat-dev \
           libavcodec-dev \
@@ -92,6 +93,7 @@ jobs:
           libxcursor-dev \
           libxrandr-dev \
           libxinerama-dev \
+          libxss-dev \
           pkg-config \
           libavformat-dev \
           libavcodec-dev \
