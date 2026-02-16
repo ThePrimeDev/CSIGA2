@@ -4,60 +4,10 @@ on: [push, pull_request]
 
 jobs:
   build:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-22.04, ubuntu-24.04]
-        compiler: [g++-11, g++-12, g++-13, g++-14, g++-15, clang++-18, clang++-19, clang++-20, clang++-21]
-        configuration: [Debug, Release]
-        exclude:
-          - os: ubuntu-22.04
-            compiler: g++-13
-          - os: ubuntu-22.04
-            compiler: g++-14
-          - os: ubuntu-22.04
-            compiler: g++-15
-          - os: ubuntu-22.04
-            compiler: clang++-18
-          - os: ubuntu-22.04
-            compiler: clang++-19
-          - os: ubuntu-22.04
-            compiler: clang++-20
-          - os: ubuntu-22.04
-            compiler: clang++-21
-          - os: ubuntu-24.04
-            compiler: g++-11
-          - os: ubuntu-24.04
-            compiler: g++-12
-        include:
-          - os: ubuntu-24.04
-            compiler: g++-15
-            container: ubuntu:25.04
-
-    container: ${{ matrix.container }}
-
+    runs-on: ubuntu-24.04
     steps:
     - uses: actions/checkout@v4
-    - name: prepare clang++-19
-      if: matrix.compiler == 'clang++-19'
-      run: |
-        wget https://apt.llvm.org/llvm.sh
-        chmod +x llvm.sh
-        sudo ./llvm.sh 19
-    - name: prepare clang++-20
-      if: matrix.compiler == 'clang++-20'
-      run: |
-        wget https://apt.llvm.org/llvm.sh
-        chmod +x llvm.sh
-        sudo ./llvm.sh 20
-    - name: prepare clang++-21
-      if: matrix.compiler == 'clang++-21'
-      run: |
-        wget https://apt.llvm.org/llvm.sh
-        chmod +x llvm.sh
-        sudo ./llvm.sh 21
     - name: Install system dependencies
-      if: ${{ !matrix.container }}
       run: |
         sudo apt-get update
         sudo apt-get install -y \
@@ -80,49 +30,23 @@ jobs:
           libavcodec-dev \
           libswscale-dev \
           libswresample-dev \
-          libavutil-dev
-    - name: prepare in docker
-      if: matrix.container
-      run: |
-        apt update
-        apt install -y cmake git g++-15 \
-          libgl1-mesa-dev \
-          libglu1-mesa-dev \
-          mesa-common-dev \
-          libglvnd-dev \
-          libx11-dev \
-          libxext-dev \
-          libxi-dev \
-          libxcursor-dev \
-          libxrandr-dev \
-          libxinerama-dev \
-          libxss-dev \
-          libxtst-dev \
-          libxfixes-dev \
-          libxrender-dev \
-          pkg-config \
-          libavformat-dev \
-          libavcodec-dev \
-          libswscale-dev \
-          libswresample-dev \
-          libavutil-dev
+          libavutil-dev \
+          g++-15
     - name: checkout external dependencies
       run: |
         mkdir -p external
         git clone --depth 1 https://github.com/libsdl-org/SDL external/SDL
         git clone --depth 1 -b docking https://github.com/ocornut/imgui external/imgui
     - name: configure
-      run: cmake -S . -B build -DCSIGA2_FUN=OFF
+      run: cmake -S . -B build -DCSIGA2_FUN=OFF -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=g++-15
     - name: build source
       run: cmake --build build --target prod
-    - name: Archive build/prod (only from the Release matrix entry)
-      if: matrix.os == 'ubuntu-24.04' && matrix.compiler == 'g++-15' && matrix.configuration == 'Release'
+    - name: Archive build/prod
       run: |
         # create a reproducible zip of the built prod folder
         python -m zipfile -r build/prod.zip build/prod
         ls -lah build/prod.zip
     - name: Upload prod artifact
-      if: matrix.os == 'ubuntu-24.04' && matrix.compiler == 'g++-15' && matrix.configuration == 'Release'
       uses: actions/upload-artifact@v4
       with:
         name: prod-zip
