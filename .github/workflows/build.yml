@@ -72,6 +72,9 @@ jobs:
           libxrandr-dev \
           libxinerama-dev \
           libxss-dev \
+          libxtst-dev \
+          libxfixes-dev \
+          libxrender-dev \
           pkg-config \
           libavformat-dev \
           libavcodec-dev \
@@ -94,6 +97,9 @@ jobs:
           libxrandr-dev \
           libxinerama-dev \
           libxss-dev \
+          libxtst-dev \
+          libxfixes-dev \
+          libxrender-dev \
           pkg-config \
           libavformat-dev \
           libavcodec-dev \
