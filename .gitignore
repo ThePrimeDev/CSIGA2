@@ -1,2 +1,4 @@
 build/
 .cache/
+build-rel/
+build-fun/

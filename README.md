@@ -1,3 +1,5 @@
+[![Linux](https://github.com/ThePrimeDev/CSIGA2/actions/workflows/build.yml/badge.svg?branch=master&event=push)](https://github.com/ThePrimeDev/CSIGA2/actions/workflows/build.yml)
+
 # Counter-Strike Intelligent Game Assistant 2 (CSIGA2)
 
 This is a minimal Dear ImGui + SDL3 + OpenGL2 overlay scaffold for Counter-Strike Intelligent Game Assistant 2.
