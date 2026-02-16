@@ -31,14 +31,14 @@ jobs:
           libswscale-dev \
           libswresample-dev \
           libavutil-dev \
-          g++-15
+          g++-14
     - name: checkout external dependencies
       run: |
         mkdir -p external
         git clone --depth 1 https://github.com/libsdl-org/SDL external/SDL
         git clone --depth 1 -b docking https://github.com/ocornut/imgui external/imgui
     - name: configure
-      run: cmake -S . -B build -DCSIGA2_FUN=OFF -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=g++-15
+      run: cmake -S . -B build -DCSIGA2_FUN=OFF -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=g++-14
     - name: build source
       run: cmake --build build --target prod
     - name: Archive build/prod
