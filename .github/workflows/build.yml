@@ -78,7 +78,7 @@ jobs:
         ls -lah build/prod.zip
     - name: Upload prod artifact
       if: matrix.os == 'ubuntu-24.04' && matrix.compiler == 'g++-15' && matrix.configuration == 'Release'
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: prod-zip
         path: build/prod.zip
@@ -89,7 +89,7 @@ jobs:
     if: github.event_name == 'push'
     steps:
       - name: Download prod artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: prod-zip
           path: ./release
