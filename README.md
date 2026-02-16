@@ -1,4 +1,4 @@
-[![Linux](https://github.com/ThePrimeDev/CSIGA2/actions/workflows/build.yml/badge.svg?branch=master&event=push)](https://github.com/ThePrimeDev/CSIGA2/actions/workflows/build.yml)
+[![Linux](https://github.com/ThePrimeDev/CSIGA2/actions/workflows/build.yml/badge.svg?branch=main&event=push)](https://github.com/ThePrimeDev/CSIGA2/actions/workflows/build.yml)
 
 # Counter-Strike Intelligent Game Assistant 2 (CSIGA2)
 
