@@ -22,14 +22,31 @@ Clone the SDL repository into `external/SDL` so that `external/SDL/CMakeLists.tx
 ## Build
 
 ```bash
-cmake -S . -B build
-cmake --build build
+cmake -S . -B build -DCSIGA2_FUN=OFF
+cmake --build build --target prod
 ```
+
+```markdown
+### Building with fun features on (not recommended)
+```markdown
+This configuration enables experimental and unstable features:
+
+- **Virtual Mic for MVP Music**: Allows playing custom audio through the in-game microphone. Note that this feature is currently unstable and may cause issues.
+- **Random Video**: Includes functionality to play random videos based on random timing.
+```
+
+
+```bash
+cmake -S . -B build -DCSIGA2_FUN=ON
+cmake --build build --target prod
+```
+```
+
 
 ## Run
 
 ```bash
-./build/CSIGA2
+./build/prod/CSIGA2
 ```
 
 ## Notes
@@ -37,3 +54,12 @@ cmake --build build
 - The window is borderless, always on top, and transparent.
 - Clickthrough is enabled by default on X11; press `Insert` to toggle it so you can interact with the UI.
 - Clickthrough relies on the X11 Shape extension and requires a compositor for transparency.
+
+```markdown
+## Special Thanks
+
+- **avitrano** for [avitran0/deadlocked](https://github.com/avitran0/deadlocked), using parts of it as a source for this program.
+- **danielkrupinski** for [Osiris](https://github.com/danielkrupinski/Osiris) (some memory reading and stuff I learnt thanks to him).
+- Every other author of the programs present in the `./ignorer` folder.
+```
+
