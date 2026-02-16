@@ -56,11 +56,48 @@ jobs:
         wget https://apt.llvm.org/llvm.sh
         chmod +x llvm.sh
         sudo ./llvm.sh 21
+    - name: Install system dependencies
+      if: ${{ !matrix.container }}
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          libgl1-mesa-dev \
+          libglu1-mesa-dev \
+          mesa-common-dev \
+          libglvnd-dev \
+          libx11-dev \
+          libxext-dev \
+          libxi-dev \
+          libxcursor-dev \
+          libxrandr-dev \
+          libxinerama-dev \
+          pkg-config \
+          libavformat-dev \
+          libavcodec-dev \
+          libswscale-dev \
+          libswresample-dev \
+          libavutil-dev
     - name: prepare in docker
       if: matrix.container
       run: |
         apt update
-        apt install -y cmake git g++-15
+        apt install -y cmake git g++-15 \
+          libgl1-mesa-dev \
+          libglu1-mesa-dev \
+          mesa-common-dev \
+          libglvnd-dev \
+          libx11-dev \
+          libxext-dev \
+          libxi-dev \
+          libxcursor-dev \
+          libxrandr-dev \
+          libxinerama-dev \
+          pkg-config \
+          libavformat-dev \
+          libavcodec-dev \
+          libswscale-dev \
+          libswresample-dev \
+          libavutil-dev
     - name: checkout external dependencies
       run: |
         mkdir -p external
