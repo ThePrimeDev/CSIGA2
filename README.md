@@ -50,11 +50,9 @@ cmake --build build --target prod
 - Clickthrough is enabled by default on X11; press `Insert` to toggle it so you can interact with the UI.
 - Clickthrough relies on the X11 Shape extension and requires a compositor for transparency.
 
-```markdown
 ## Special Thanks
 
 - **avitrano** for [avitran0/deadlocked](https://github.com/avitran0/deadlocked), using parts of it as a source for this program.
 - **danielkrupinski** for [Osiris](https://github.com/danielkrupinski/Osiris) (some memory reading and stuff I learnt thanks to him).
 - Every other author of the programs present in the `./ignorer` folder.
-```
 
