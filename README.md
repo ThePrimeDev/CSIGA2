@@ -37,8 +37,6 @@ This configuration enables experimental and unstable features:
 cmake -S . -B build -DCSIGA2_FUN=ON
 cmake --build build --target prod
 ```
-```
-
 
 ## Run
 
