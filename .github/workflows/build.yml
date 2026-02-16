@@ -31,7 +31,8 @@ jobs:
           libswscale-dev \
           libswresample-dev \
           libavutil-dev \
-          g++-14
+          g++-14 \
+          zip
     - name: checkout external dependencies
       run: |
         mkdir -p external
@@ -44,7 +45,7 @@ jobs:
     - name: Archive build/prod
       run: |
         # create a reproducible zip of the built prod folder
-        python -m zipfile -r build/prod.zip build/prod
+        zip -r build/prod.zip build/prod
         ls -lah build/prod.zip
     - name: Upload prod artifact
       uses: actions/upload-artifact@v4
