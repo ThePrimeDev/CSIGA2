@@ -1,6 +1,0 @@
-external/SDL/CMakeFiles/SDL3-shared.dir/src/video/SDL_rect.c.o: \
- /home/jerryyy/CSIGA2/CSIGA2/external/SDL/src/video/SDL_rect.c \
- /usr/include/stdc-predef.h \
- /home/jerryyy/CSIGA2/CSIGA2/external/SDL/src/SDL_internal.h \
- /home/jerryyy/CSIGA2/CSIGA2/external/SDL/src/video/SDL_rect_c.h \
- /home/jerryyy/CSIGA2/CSIGA2/external/SDL/src/video/SDL_rect_impl.h
