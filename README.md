@@ -26,14 +26,11 @@ cmake -S . -B build -DCSIGA2_FUN=OFF
 cmake --build build --target prod
 ```
 
-```markdown
 ### Building with fun features on (not recommended)
-```markdown
 This configuration enables experimental and unstable features:
 
 - **Virtual Mic for MVP Music**: Allows playing custom audio through the in-game microphone. Note that this feature is currently unstable and may cause issues.
 - **Random Video**: Includes functionality to play random videos based on random timing.
-```
 
 
 ```bash
