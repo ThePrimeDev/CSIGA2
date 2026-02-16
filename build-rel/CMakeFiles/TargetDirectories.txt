@@ -1,0 +1,10 @@
+/home/jerryyy/CSIGA2/CSIGA2/build-rel/CMakeFiles/imgui.dir
+/home/jerryyy/CSIGA2/CSIGA2/build-rel/CMakeFiles/CSIGA2.dir
+/home/jerryyy/CSIGA2/CSIGA2/build-rel/CMakeFiles/prod.dir
+/home/jerryyy/CSIGA2/CSIGA2/build-rel/CMakeFiles/edit_cache.dir
+/home/jerryyy/CSIGA2/CSIGA2/build-rel/CMakeFiles/rebuild_cache.dir
+/home/jerryyy/CSIGA2/CSIGA2/build-rel/external/SDL/CMakeFiles/SDL3-shared.dir
+/home/jerryyy/CSIGA2/CSIGA2/build-rel/external/SDL/CMakeFiles/SDL3_test.dir
+/home/jerryyy/CSIGA2/CSIGA2/build-rel/external/SDL/CMakeFiles/SDL_uclibc.dir
+/home/jerryyy/CSIGA2/CSIGA2/build-rel/external/SDL/CMakeFiles/edit_cache.dir
+/home/jerryyy/CSIGA2/CSIGA2/build-rel/external/SDL/CMakeFiles/rebuild_cache.dir

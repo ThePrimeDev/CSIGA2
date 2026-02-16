@@ -1,0 +1,118 @@
+CMakeFiles/CSIGA2.dir/src/platform/x11_helpers.cpp.o: \
+ /home/jerryyy/CSIGA2/CSIGA2/src/platform/x11_helpers.cpp \
+ /usr/include/stdc-predef.h \
+ /home/jerryyy/CSIGA2/CSIGA2/src/platform/x11_helpers.h \
+ /home/jerryyy/CSIGA2/CSIGA2/external/SDL/include/SDL3/SDL.h \
+ /home/jerryyy/CSIGA2/CSIGA2/external/SDL/include/SDL3/SDL_stdinc.h \
+ /home/jerryyy/CSIGA2/CSIGA2/external/SDL/include/SDL3/SDL_platform_defines.h \
+ /usr/lib/gcc/x86_64-linux-gnu/13/include/stdarg.h /usr/include/string.h \
+ /usr/include/x86_64-linux-gnu/bits/libc-header-start.h \
+ /usr/include/features.h /usr/include/features-time64.h \
+ /usr/include/x86_64-linux-gnu/bits/wordsize.h \
+ /usr/include/x86_64-linux-gnu/bits/timesize.h \
+ /usr/include/x86_64-linux-gnu/sys/cdefs.h \
+ /usr/include/x86_64-linux-gnu/bits/long-double.h \
+ /usr/include/x86_64-linux-gnu/gnu/stubs.h \
+ /usr/include/x86_64-linux-gnu/gnu/stubs-64.h \
+ /usr/lib/gcc/x86_64-linux-gnu/13/include/stddef.h \
+ /usr/include/x86_64-linux-gnu/bits/types/locale_t.h \
+ /usr/include/x86_64-linux-gnu/bits/types/__locale_t.h \
+ /usr/include/strings.h /usr/include/wchar.h \
+ /usr/include/x86_64-linux-gnu/bits/floatn.h \
+ /usr/include/x86_64-linux-gnu/bits/floatn-common.h \
+ /usr/include/x86_64-linux-gnu/bits/wchar.h \
+ /usr/include/x86_64-linux-gnu/bits/types/wint_t.h \
+ /usr/include/x86_64-linux-gnu/bits/types/mbstate_t.h \
+ /usr/include/x86_64-linux-gnu/bits/types/__mbstate_t.h \
+ /usr/include/x86_64-linux-gnu/bits/types/__FILE.h \
+ /usr/include/x86_64-linux-gnu/bits/types/FILE.h \
+ /usr/lib/gcc/x86_64-linux-gnu/13/include/stdint.h /usr/include/stdint.h \
+ /usr/include/x86_64-linux-gnu/bits/types.h \
+ /usr/include/x86_64-linux-gnu/bits/typesizes.h \
+ /usr/include/x86_64-linux-gnu/bits/time64.h \
+ /usr/include/x86_64-linux-gnu/bits/stdint-intn.h \
+ /usr/include/x86_64-linux-gnu/bits/stdint-uintn.h \
+ /usr/include/x86_64-linux-gnu/bits/stdint-least.h \
+ /home/jerryyy/CSIGA2/CSIGA2/external/SDL/include/SDL3/SDL_begin_code.h \
+ /home/jerryyy/CSIGA2/CSIGA2/external/SDL/include/SDL3/SDL_close_code.h \
+ /home/jerryyy/CSIGA2/CSIGA2/external/SDL/include/SDL3/SDL_assert.h \
+ /home/jerryyy/CSIGA2/CSIGA2/external/SDL/include/SDL3/SDL_asyncio.h \
+ /home/jerryyy/CSIGA2/CSIGA2/external/SDL/include/SDL3/SDL_atomic.h \
+ /home/jerryyy/CSIGA2/CSIGA2/external/SDL/include/SDL3/SDL_audio.h \
+ /home/jerryyy/CSIGA2/CSIGA2/external/SDL/include/SDL3/SDL_endian.h \
+ /usr/include/endian.h /usr/include/x86_64-linux-gnu/bits/endian.h \
+ /usr/include/x86_64-linux-gnu/bits/endianness.h \
+ /usr/include/x86_64-linux-gnu/bits/byteswap.h \
+ /usr/include/x86_64-linux-gnu/bits/uintn-identity.h \
+ /home/jerryyy/CSIGA2/CSIGA2/external/SDL/include/SDL3/SDL_error.h \
+ /home/jerryyy/CSIGA2/CSIGA2/external/SDL/include/SDL3/SDL_mutex.h \
+ /home/jerryyy/CSIGA2/CSIGA2/external/SDL/include/SDL3/SDL_thread.h \
+ /home/jerryyy/CSIGA2/CSIGA2/external/SDL/include/SDL3/SDL_properties.h \
+ /home/jerryyy/CSIGA2/CSIGA2/external/SDL/include/SDL3/SDL_iostream.h \
+ /home/jerryyy/CSIGA2/CSIGA2/external/SDL/include/SDL3/SDL_bits.h \
+ /home/jerryyy/CSIGA2/CSIGA2/external/SDL/include/SDL3/SDL_blendmode.h \
+ /home/jerryyy/CSIGA2/CSIGA2/external/SDL/include/SDL3/SDL_camera.h \
+ /home/jerryyy/CSIGA2/CSIGA2/external/SDL/include/SDL3/SDL_pixels.h \
+ /home/jerryyy/CSIGA2/CSIGA2/external/SDL/include/SDL3/SDL_surface.h \
+ /home/jerryyy/CSIGA2/CSIGA2/external/SDL/include/SDL3/SDL_rect.h \
+ /home/jerryyy/CSIGA2/CSIGA2/external/SDL/include/SDL3/SDL_clipboard.h \
+ /home/jerryyy/CSIGA2/CSIGA2/external/SDL/include/SDL3/SDL_cpuinfo.h \
+ /home/jerryyy/CSIGA2/CSIGA2/external/SDL/include/SDL3/SDL_dialog.h \
+ /home/jerryyy/CSIGA2/CSIGA2/external/SDL/include/SDL3/SDL_video.h \
+ /home/jerryyy/CSIGA2/CSIGA2/external/SDL/include/SDL3/SDL_dlopennote.h \
+ /home/jerryyy/CSIGA2/CSIGA2/external/SDL/include/SDL3/SDL_events.h \
+ /home/jerryyy/CSIGA2/CSIGA2/external/SDL/include/SDL3/SDL_gamepad.h \
+ /home/jerryyy/CSIGA2/CSIGA2/external/SDL/include/SDL3/SDL_guid.h \
+ /home/jerryyy/CSIGA2/CSIGA2/external/SDL/include/SDL3/SDL_joystick.h \
+ /home/jerryyy/CSIGA2/CSIGA2/external/SDL/include/SDL3/SDL_power.h \
+ /home/jerryyy/CSIGA2/CSIGA2/external/SDL/include/SDL3/SDL_sensor.h \
+ /home/jerryyy/CSIGA2/CSIGA2/external/SDL/include/SDL3/SDL_keyboard.h \
+ /home/jerryyy/CSIGA2/CSIGA2/external/SDL/include/SDL3/SDL_keycode.h \
+ /home/jerryyy/CSIGA2/CSIGA2/external/SDL/include/SDL3/SDL_scancode.h \
+ /home/jerryyy/CSIGA2/CSIGA2/external/SDL/include/SDL3/SDL_mouse.h \
+ /home/jerryyy/CSIGA2/CSIGA2/external/SDL/include/SDL3/SDL_pen.h \
+ /home/jerryyy/CSIGA2/CSIGA2/external/SDL/include/SDL3/SDL_touch.h \
+ /home/jerryyy/CSIGA2/CSIGA2/external/SDL/include/SDL3/SDL_filesystem.h \
+ /home/jerryyy/CSIGA2/CSIGA2/external/SDL/include/SDL3/SDL_gpu.h \
+ /home/jerryyy/CSIGA2/CSIGA2/external/SDL/include/SDL3/SDL_haptic.h \
+ /home/jerryyy/CSIGA2/CSIGA2/external/SDL/include/SDL3/SDL_hidapi.h \
+ /home/jerryyy/CSIGA2/CSIGA2/external/SDL/include/SDL3/SDL_hints.h \
+ /home/jerryyy/CSIGA2/CSIGA2/external/SDL/include/SDL3/SDL_init.h \
+ /home/jerryyy/CSIGA2/CSIGA2/external/SDL/include/SDL3/SDL_loadso.h \
+ /home/jerryyy/CSIGA2/CSIGA2/external/SDL/include/SDL3/SDL_locale.h \
+ /home/jerryyy/CSIGA2/CSIGA2/external/SDL/include/SDL3/SDL_log.h \
+ /home/jerryyy/CSIGA2/CSIGA2/external/SDL/include/SDL3/SDL_messagebox.h \
+ /home/jerryyy/CSIGA2/CSIGA2/external/SDL/include/SDL3/SDL_metal.h \
+ /home/jerryyy/CSIGA2/CSIGA2/external/SDL/include/SDL3/SDL_misc.h \
+ /home/jerryyy/CSIGA2/CSIGA2/external/SDL/include/SDL3/SDL_platform.h \
+ /home/jerryyy/CSIGA2/CSIGA2/external/SDL/include/SDL3/SDL_process.h \
+ /home/jerryyy/CSIGA2/CSIGA2/external/SDL/include/SDL3/SDL_render.h \
+ /home/jerryyy/CSIGA2/CSIGA2/external/SDL/include/SDL3/SDL_storage.h \
+ /home/jerryyy/CSIGA2/CSIGA2/external/SDL/include/SDL3/SDL_system.h \
+ /home/jerryyy/CSIGA2/CSIGA2/external/SDL/include/SDL3/SDL_time.h \
+ /home/jerryyy/CSIGA2/CSIGA2/external/SDL/include/SDL3/SDL_timer.h \
+ /home/jerryyy/CSIGA2/CSIGA2/external/SDL/include/SDL3/SDL_tray.h \
+ /home/jerryyy/CSIGA2/CSIGA2/external/SDL/include/SDL3/SDL_version.h \
+ /home/jerryyy/CSIGA2/CSIGA2/external/SDL/include/SDL3/SDL_oldnames.h \
+ /usr/include/X11/Xlib.h /usr/include/x86_64-linux-gnu/sys/types.h \
+ /usr/include/x86_64-linux-gnu/bits/types/clock_t.h \
+ /usr/include/x86_64-linux-gnu/bits/types/clockid_t.h \
+ /usr/include/x86_64-linux-gnu/bits/types/time_t.h \
+ /usr/include/x86_64-linux-gnu/bits/types/timer_t.h \
+ /usr/include/x86_64-linux-gnu/sys/select.h \
+ /usr/include/x86_64-linux-gnu/bits/select.h \
+ /usr/include/x86_64-linux-gnu/bits/types/sigset_t.h \
+ /usr/include/x86_64-linux-gnu/bits/types/__sigset_t.h \
+ /usr/include/x86_64-linux-gnu/bits/types/struct_timeval.h \
+ /usr/include/x86_64-linux-gnu/bits/types/struct_timespec.h \
+ /usr/include/x86_64-linux-gnu/bits/pthreadtypes.h \
+ /usr/include/x86_64-linux-gnu/bits/thread-shared-types.h \
+ /usr/include/x86_64-linux-gnu/bits/pthreadtypes-arch.h \
+ /usr/include/x86_64-linux-gnu/bits/atomic_wide_counter.h \
+ /usr/include/x86_64-linux-gnu/bits/struct_mutex.h \
+ /usr/include/x86_64-linux-gnu/bits/struct_rwlock.h /usr/include/X11/X.h \
+ /usr/include/X11/Xfuncproto.h /usr/include/X11/Xosdefs.h \
+ /usr/include/X11/Xutil.h /usr/include/X11/keysym.h \
+ /usr/include/X11/keysymdef.h /usr/include/X11/Xatom.h \
+ /usr/include/X11/extensions/shape.h \
+ /usr/include/X11/extensions/shapeconst.h
