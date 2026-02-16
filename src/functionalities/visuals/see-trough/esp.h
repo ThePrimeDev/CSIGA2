@@ -141,8 +141,10 @@ private:
 extern EspManager g_esp_manager;
 
 // Rendering functions
-bool UpdateEspThrottled(float current_time);
-void RenderEsp(const ImVec2& window_pos, const ImVec2& window_size);
+void RenderEsp(const ImVec2& window_pos, 
+               const ImVec2& window_size, 
+               const std::vector<EspPlayerData>& players,
+               const memory::Mat4& view_matrix);
 
 // World to screen projection
 std::optional<ImVec2> WorldToScreen(const memory::Vec3& world_pos,

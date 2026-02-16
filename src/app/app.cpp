@@ -25,6 +25,7 @@
 #include "ui/assets.h"
 #include "ui/state.h"
 #include "ui/theme.h"
+#include "app/game_data_thread.h"
 #include "functionalities/visuals/see-trough/esp.h"
 #include "functionalities/aimbot/aimbot.h"
 #include "functionalities/radar/radar.h"
@@ -201,10 +202,7 @@ bool HintARGBVisual() {
 #endif
 }
 
-bool UpdateEspManagerThrottled() {
-  float current_time = static_cast<float>(ImGui::GetTime());
-  return esp::UpdateEspThrottled(current_time);
-}
+
 
 const char* BombSiteLabel(int32_t site) {
   switch (site) {
@@ -376,6 +374,9 @@ int App::Run() {
   };
 #endif
 
+  GameDataThread game_data_thread;
+  game_data_thread.start();
+
   while (running) {
     if (g_exit_requested.load()) {
       running = false;
@@ -434,6 +435,9 @@ int App::Run() {
     ImGui_ImplSDL3_NewFrame();
     ImGui::NewFrame();
 
+    // --- Get latest game data snapshot ---
+    GameSnapshot snapshot = game_data_thread.getSnapshot();
+
     if (g_see_through_walls) {
       ImGuiIO &io = ImGui::GetIO();
       ImGui::SetNextWindowPos(ImVec2(0.0f, 0.0f));
@@ -442,95 +446,110 @@ int App::Run() {
                    ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove |
                        ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoInputs |
                        ImGuiWindowFlags_NoBackground);
-      esp::RenderEsp(ImGui::GetWindowPos(), ImGui::GetWindowSize());
+      
+      if (snapshot.connected) {
+        esp::RenderEsp(ImGui::GetWindowPos(), ImGui::GetWindowSize(), snapshot.players, snapshot.viewMatrix);
+      } else {
+        ImDrawList* draw = ImGui::GetWindowDrawList();
+        const char* msg = "Waiting for CS2...";
+        ImVec2 text_size = ImGui::CalcTextSize(msg);
+        ImVec2 window_pos = ImGui::GetWindowPos();
+        ImVec2 window_size = ImGui::GetWindowSize();
+        ImVec2 pos(window_pos.x + (window_size.x - text_size.x) * 0.5f,
+                   window_pos.y + 50.0f);
+        draw->AddText(pos, IM_COL32(255, 200, 100, 255), msg);
+      }
       ImGui::End();
     }
 
-    // Update Clickity (Triggerbot)
-    functionalities::Clickity::Get().Update();
-
-    // Update Aimbot
-    functionalities::Aimbot::Get().Update();
+    // Aimbot and Triggerbot updates are handled by GameDataThread.
+    // We only need to ensure their settings are updated if necessary, 
+    // but they read globals directly or via settings struct.
+    // The background thread calls ApplyAim/ApplyAction as well.
 
     // Draw Radar
-    functionalities::DrawRadar(ui_visible);
+    if (snapshot.connected && snapshot.hasLocalPlayer) {
+      functionalities::DrawRadar(
+          ui_visible, 
+          snapshot.players, 
+          snapshot.localEyePos, 
+          snapshot.localViewAnglesRaw.y, 
+          snapshot.localTeam);
+    } else {
+      // Just draw radar BG if not connected? Or maybe nothing.
+      // Radar handles "connected" check internally? No, we removed it.
+      // So checking snapshot.connected is correct.
+      if (ui_visible) {
+        // We can pass empty vector to draw radar UI frame at least
+         static std::vector<esp::EspPlayerData> empty_players;
+         functionalities::DrawRadar(ui_visible, empty_players, {}, 0.0f, 0);
+      }
+    }
 
     if (g_grenade_pred) {
-      if (UpdateEspManagerThrottled()) {
-        const auto& process_opt = esp::g_esp_manager.getProcess();
-        const auto& offsets_opt = esp::g_esp_manager.getOffsets();
-        if (process_opt.has_value() && offsets_opt.has_value()) {
-          const auto& process = process_opt.value();
-          const auto& offsets = offsets_opt.value();
-          auto local_player_opt = memory::Player::localPlayer(process, offsets);
-          if (local_player_opt.has_value()) {
-            const auto& local_player = local_player_opt.value();
-            if (local_player.isValid(process, offsets)) {
-              memory::Weapon weapon = local_player.weapon(process, offsets);
-              bool is_grenade = (weapon == memory::Weapon::Flashbang ||
-                                 weapon == memory::Weapon::HeGrenade ||
-                                 weapon == memory::Weapon::Smoke ||
-                                 weapon == memory::Weapon::Molotov ||
-                                 weapon == memory::Weapon::Decoy ||
-                                 weapon == memory::Weapon::Incendiary);
-              if (is_grenade) {
-                const memory::Vec2 view_angles = local_player.viewAngles(process, offsets);
-                const memory::Vec3 direction = AngleToDirection(view_angles);
-                const memory::Vec3 eye_pos = local_player.eyePosition(process, offsets);
-                const memory::Vec3 player_vel = local_player.velocity(process, offsets);
-                constexpr float kDefaultThrowStrength = 1.0f;  // Full throw (can't read game mouse state externally)
+      if (snapshot.connected && snapshot.localPlayerValid) {
+         memory::Weapon weapon = snapshot.localWeaponEnum;
+         bool is_grenade = (weapon == memory::Weapon::Flashbang ||
+                            weapon == memory::Weapon::HeGrenade ||
+                            weapon == memory::Weapon::Smoke ||
+                            weapon == memory::Weapon::Molotov ||
+                            weapon == memory::Weapon::Decoy ||
+                            weapon == memory::Weapon::Incendiary);
+         if (is_grenade) {
+           const memory::Vec2 view_angles = snapshot.localViewAnglesRaw;
+           const memory::Vec3 direction = AngleToDirection(view_angles);
+           const memory::Vec3 eye_pos = snapshot.localEyePos;
+           const memory::Vec3 player_vel = snapshot.localVelocity;
+           constexpr float kDefaultThrowStrength = 1.0f;  // Full throw
 
-                // Start position: eye + player_vel*0.1 forward, offset Z by throw strength
-                const memory::Vec3 adjusted_eye(
-                    eye_pos.x + player_vel.x * 0.1f,
-                    eye_pos.y + player_vel.y * 0.1f,
-                    eye_pos.z + player_vel.z * 0.1f + (kDefaultThrowStrength * 12.0f - 12.0f)
-                );
-                // Trace forward 22 units, then back up 6 (approximation without actual trace)
-                const memory::Vec3 start = adjusted_eye + direction * 16.0f;
-                const memory::Vec3 velocity = CalculateThrowVelocity(view_angles, kDefaultThrowStrength,
-                                                                    player_vel, weapon);
+           // Start position: eye + player_vel*0.1 forward, offset Z by throw strength
+           const memory::Vec3 adjusted_eye(
+               eye_pos.x + player_vel.x * 0.1f,
+               eye_pos.y + player_vel.y * 0.1f,
+               eye_pos.z + player_vel.z * 0.1f + (kDefaultThrowStrength * 12.0f - 12.0f)
+           );
+           // Trace forward 22 units, then back up 6 (approximation)
+           const memory::Vec3 start = adjusted_eye + direction * 16.0f;
+           const memory::Vec3 velocity = CalculateThrowVelocity(view_angles, kDefaultThrowStrength,
+                                                               player_vel, weapon);
 
-                const auto trajectory = SimulateGrenadeTrajectory(start, velocity, weapon);
-                const auto& view_matrix = esp::g_esp_manager.getViewMatrix();
-                ImVec2 screen_size = ImVec2(static_cast<float>(esp::g_esp_manager.getWindowSize().x),
-                                            static_cast<float>(esp::g_esp_manager.getWindowSize().y));
-                if (screen_size.x <= 1.0f || screen_size.y <= 1.0f) {
-                  ImGuiIO &io = ImGui::GetIO();
-                  screen_size = io.DisplaySize;
-                }
-                ImDrawList* draw = ImGui::GetForegroundDrawList();
-                ImU32 color = ImGui::ColorConvertFloat4ToU32(g_grenade_pred_color);
+           const auto trajectory = SimulateGrenadeTrajectory(start, velocity, weapon);
+           const auto& view_matrix = snapshot.viewMatrix;
+           ImVec2 screen_size = ImVec2(static_cast<float>(snapshot.windowSize.x),
+                                       static_cast<float>(snapshot.windowSize.y));
+           if (screen_size.x <= 1.0f || screen_size.y <= 1.0f) {
+             ImGuiIO &io = ImGui::GetIO();
+             screen_size = io.DisplaySize;
+           }
+           ImDrawList* draw = ImGui::GetForegroundDrawList();
+           ImU32 color = ImGui::ColorConvertFloat4ToU32(g_grenade_pred_color);
 
-                // Draw trajectory line
-                for (size_t i = 1; i < trajectory.path.size(); ++i) {
-                  auto p0 = esp::WorldToScreen(trajectory.path[i - 1], view_matrix, screen_size);
-                  auto p1 = esp::WorldToScreen(trajectory.path[i], view_matrix, screen_size);
-                  if (!p0.has_value() || !p1.has_value()) continue;
-                  draw->AddLine(*p0, *p1, color, 2.0f);
-                }
+           // Draw trajectory line
+           for (size_t i = 1; i < trajectory.path.size(); ++i) {
+             auto p0 = esp::WorldToScreen(trajectory.path[i - 1], view_matrix, screen_size);
+             auto p1 = esp::WorldToScreen(trajectory.path[i], view_matrix, screen_size);
+             if (!p0.has_value() || !p1.has_value()) continue;
+             draw->AddLine(*p0, *p1, color, 2.0f);
+           }
 
-                // Draw endpoint marker (filled circle at detonation/landing point)
-                auto endpoint_screen = esp::WorldToScreen(trajectory.endpoint, view_matrix, screen_size);
-                if (endpoint_screen.has_value()) {
-                  draw->AddCircleFilled(*endpoint_screen, 6.0f, color, 16);
-                  draw->AddCircle(*endpoint_screen, 8.0f, IM_COL32(0, 0, 0, 200), 16, 2.0f);
-                }
-              }
-            }
-          }
-        }
+           // Draw endpoint marker
+           auto endpoint_screen = esp::WorldToScreen(trajectory.endpoint, view_matrix, screen_size);
+           if (endpoint_screen.has_value()) {
+             draw->AddCircleFilled(*endpoint_screen, 6.0f, color, 16);
+             draw->AddCircle(*endpoint_screen, 8.0f, IM_COL32(0, 0, 0, 200), 16, 2.0f);
+           }
+         }
       }
     }
 
     // Grenade Proximity Warning overlay
     if (g_grenade_proximity_warning) {
-      if (UpdateEspManagerThrottled()) {
-        const auto& grenades = esp::g_esp_manager.getGrenadeProximity();
+      if (snapshot.connected) {
+        const auto& grenades = snapshot.grenadeProximity;
         if (!grenades.empty()) {
-          const auto& view_matrix = esp::g_esp_manager.getViewMatrix();
-          ImVec2 screen_size = ImVec2(static_cast<float>(esp::g_esp_manager.getWindowSize().x),
-                                      static_cast<float>(esp::g_esp_manager.getWindowSize().y));
+          const auto& view_matrix = snapshot.viewMatrix;
+          ImVec2 screen_size = ImVec2(static_cast<float>(snapshot.windowSize.x),
+                                      static_cast<float>(snapshot.windowSize.y));
           if (screen_size.x <= 1.0f || screen_size.y <= 1.0f) {
             ImGuiIO &io = ImGui::GetIO();
             screen_size = io.DisplaySize;
@@ -638,9 +657,16 @@ int App::Run() {
 
     // Sniper crosshair overlay (separate from ESP)
     if (g_sniper_crosshair) {
-      if (UpdateEspManagerThrottled() &&
-          esp::g_esp_manager.isLocalPlayerHoldingSniper()) {
-        ImGuiIO &io = ImGui::GetIO();
+      if (snapshot.connected && snapshot.localPlayerValid) {
+         memory::Weapon w = snapshot.localWeaponEnum;
+         bool is_sniper = (w == memory::Weapon::Awp || 
+                           w == memory::Weapon::G3SG1 || 
+                           w == memory::Weapon::Scar20 || 
+                           w == memory::Weapon::Ssg08);
+         
+         if (is_sniper) {
+            ImGuiIO &io = ImGui::GetIO();
+            // ... (rest of drawing code)
         ImGui::SetNextWindowPos(ImVec2(0.0f, 0.0f));
         ImGui::SetNextWindowSize(io.DisplaySize);
         ImGui::Begin("##crosshair_overlay", nullptr,
@@ -684,9 +710,10 @@ int App::Run() {
         ImGui::End();
       }
     }
+  }
 
     if (g_headshoot_line) {
-      if (UpdateEspManagerThrottled()) {
+      if (snapshot.connected) {
         ImGuiIO &io = ImGui::GetIO();
         ImGui::SetNextWindowPos(ImVec2(0.0f, 0.0f));
         ImGui::SetNextWindowSize(io.DisplaySize);
@@ -697,8 +724,8 @@ int App::Run() {
         {
           ImDrawList* draw = ImGui::GetWindowDrawList();
           ImVec2 center(io.DisplaySize.x * 0.5f, io.DisplaySize.y * 0.5f);
-          memory::Vec2 view_angles = esp::g_esp_manager.getLocalViewAngles();
-          float fov_deg = esp::g_esp_manager.getLocalFov();
+          memory::Vec2 view_angles = snapshot.localViewAngles;
+          float fov_deg = snapshot.localFov;
           if (fov_deg <= 1.0f) {
             fov_deg = static_cast<float>(memory::cs2::DEFAULT_FOV);
           }
@@ -758,10 +785,10 @@ int App::Run() {
         g_bomb_panel_pos = ImGui::GetWindowPos();
       }
       last_ui_visible = ui_visible;
-      if (!UpdateEspManagerThrottled()) {
+      if (!snapshot.connected) {
         ImGui::TextUnformatted("Waiting for CS2...");
       } else {
-        const auto& bomb = esp::g_esp_manager.getBombData();
+        const auto& bomb = snapshot.bomb;
         if (!bomb.planted) {
           ImGui::TextUnformatted("Bomb not planted.");
         } else {
@@ -834,7 +861,7 @@ int App::Run() {
       static float congrats_until = 0.0f;
       float now = static_cast<float>(ImGui::GetTime());
 
-      if (UpdateEspManagerThrottled()) {
+      if (snapshot.connected) {
         int32_t current_mvp = esp::g_esp_manager.getLocalMvpCount();
         if (current_mvp > last_mvp_count) {
           if (g_mvp_music_enabled) {

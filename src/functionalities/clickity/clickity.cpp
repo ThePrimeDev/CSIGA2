@@ -23,6 +23,14 @@ Clickity& Clickity::Get() {
 Clickity::Clickity() : rng_(std::random_device{}()) {}
 
 void Clickity::Update() {
+    ReadGameData();
+    ApplyAction();
+}
+
+void Clickity::ReadGameData() {
+    std::lock_guard<std::mutex> lock(mutex_);
+    should_schedule_shot_ = false;
+
     if (!enabled_) {
         shot_start_.reset();
         shot_end_.reset();
@@ -31,18 +39,10 @@ void Clickity::Update() {
     }
 
     auto now = std::chrono::steady_clock::now();
-    auto mouse = platform::Mouse::Get();
 
-    // Handle shooting state
-    if (shot_start_.has_value() && now >= shot_start_.value()) {
-        mouse->LeftPress();
-        shot_start_.reset();
-    }
-
-    if (shot_end_.has_value() && now >= shot_end_.value()) {
-        mouse->LeftRelease();
-        shot_end_.reset();
-        cooldown_end_ = now + std::chrono::milliseconds(click_delay_);
+    // Don't compute new targets if we're mid-shot or cooling down
+    if (shot_start_.has_value() || shot_end_.has_value()) {
+        return;
     }
 
     if (cooldown_end_.has_value()) {
@@ -50,11 +50,6 @@ void Clickity::Update() {
             return;
         }
         cooldown_end_.reset();
-    }
-
-    // Don't process new shots if we are currently shooting or waiting to shoot
-    if (shot_start_.has_value() || shot_end_.has_value()) {
-        return;
     }
 
     // Basic connection check
@@ -127,17 +122,46 @@ void Clickity::Update() {
         if (localPlayer.team(process, offsets) == target.team(process, offsets)) return;
     }
     
-    // We have a target! Calculate delay.
-    float mean = (delay_start_ + delay_end_) / 2.0f;
-    float std_dev = (delay_end_ - delay_start_) / 2.0f;
-    if (std_dev < 0.1f) std_dev = 0.1f; // Avoid zero division/invalid std_dev
-    
-    std::normal_distribution<float> d(mean, std_dev);
-    float delay_ms = d(rng_);
-    if (delay_ms < 0.0f) delay_ms = 0.0f;
-    
-    shot_start_ = now + std::chrono::milliseconds(static_cast<long long>(delay_ms));
-    shot_end_ = shot_start_.value() + std::chrono::milliseconds(shot_duration_);
+    // We have a valid target
+    should_schedule_shot_ = true;
+}
+
+void Clickity::ApplyAction() {
+    std::lock_guard<std::mutex> lock(mutex_);
+
+    if (!enabled_) return;
+
+    auto now = std::chrono::steady_clock::now();
+    auto mouse = platform::Mouse::Get();
+
+    // Handle shooting state machine
+    if (shot_start_.has_value() && now >= shot_start_.value()) {
+        mouse->LeftPress();
+        shot_start_.reset();
+    }
+
+    if (shot_end_.has_value() && now >= shot_end_.value()) {
+        mouse->LeftRelease();
+        shot_end_.reset();
+        cooldown_end_ = now + std::chrono::milliseconds(click_delay_);
+    }
+
+    // Schedule new shot if ReadGameData found a target
+    if (should_schedule_shot_ && !shot_start_.has_value() && !shot_end_.has_value()) {
+        should_schedule_shot_ = false;
+
+        // We have a target! Calculate delay.
+        float mean = (delay_start_ + delay_end_) / 2.0f;
+        float std_dev = (delay_end_ - delay_start_) / 2.0f;
+        if (std_dev < 0.1f) std_dev = 0.1f; // Avoid zero division/invalid std_dev
+        
+        std::normal_distribution<float> d(mean, std_dev);
+        float delay_ms = d(rng_);
+        if (delay_ms < 0.0f) delay_ms = 0.0f;
+        
+        shot_start_ = now + std::chrono::milliseconds(static_cast<long long>(delay_ms));
+        shot_end_ = shot_start_.value() + std::chrono::milliseconds(shot_duration_);
+    }
 }
 
 } // namespace functionalities

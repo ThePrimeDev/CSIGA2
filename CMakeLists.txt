@@ -54,6 +54,7 @@ target_link_libraries(imgui PUBLIC OpenGL::GL)
 add_executable(CSIGA2
   src/main.cpp
   src/app/app.cpp
+  src/app/game_data_thread.cpp
   src/platform/x11_helpers.cpp
   src/ui/menu.cpp
   src/ui/assets.cpp

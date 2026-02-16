@@ -133,25 +133,7 @@ static uint64_t FindPlantedC4Handle(const memory::Process& process, const memory
     return 0;
 }
 
-bool UpdateEspThrottled(float current_time) {
-    static float last_connect_attempt = 0.0f;
-    static float last_update = 0.0f;
-    constexpr float kUpdateInterval = 0.05f;  // Throttle heavy memory scans
 
-    if (!g_esp_manager.isConnected()) {
-        if (current_time - last_connect_attempt > 2.0f) {
-            last_connect_attempt = current_time;
-            g_esp_manager.connect();
-        }
-    }
-
-    if (g_esp_manager.isConnected() && current_time - last_update > kUpdateInterval) {
-        last_update = current_time;
-        g_esp_manager.update();
-    }
-
-    return g_esp_manager.isConnected();
-}
 
 EspManager::EspManager() = default;
 EspManager::~EspManager() = default;
@@ -546,19 +528,10 @@ std::optional<ImVec2> WorldToScreen(const memory::Vec3& world_pos,
 }
 
 // Render ESP for all players
-void RenderEsp(const ImVec2& window_pos, const ImVec2& window_size) {
-    float current_time = static_cast<float>(ImGui::GetTime());
-
-    if (!UpdateEspThrottled(current_time)) {
-        ImDrawList* draw = ImGui::GetWindowDrawList();
-        const char* msg = "Waiting for CS2...";
-        ImVec2 text_size = ImGui::CalcTextSize(msg);
-        ImVec2 pos(window_pos.x + (window_size.x - text_size.x) * 0.5f,
-                   window_pos.y + 50.0f);
-        draw->AddText(pos, IM_COL32(255, 200, 100, 255), msg);
-        return;
-    }
-
+void RenderEsp(const ImVec2& window_pos, 
+               const ImVec2& window_size, 
+               const std::vector<EspPlayerData>& players,
+               const memory::Mat4& view_matrix) {
     ImDrawList* draw = ImGui::GetWindowDrawList();
     auto& settings = g_esp_manager.settings();
     settings.show_box = g_esp_show_box;
@@ -567,11 +540,10 @@ void RenderEsp(const ImVec2& window_pos, const ImVec2& window_size) {
     settings.show_name = g_esp_show_name;
     settings.show_weapon = g_esp_show_weapon;
     settings.show_head = g_esp_show_head;
-    const auto& viewMatrix = g_esp_manager.getViewMatrix();
     ImVec2 screen_size = window_size;
 
     // Render each player
-    for (const auto& player : g_esp_manager.getPlayers()) {
+    for (const auto& player : players) {
         // Filter based on team selection from UI
         // g_esp_team_filter: 0 = Enemies only, 1 = Team only, 2 = All
         switch (static_cast<EspTeamFilter>(g_esp_team_filter)) {
@@ -587,8 +559,8 @@ void RenderEsp(const ImVec2& window_pos, const ImVec2& window_size) {
         }
 
         // Project feet and head to screen
-        auto feetScreen = WorldToScreen(player.position, viewMatrix, screen_size);
-        auto headScreen = WorldToScreen(player.head_position, viewMatrix, screen_size);
+        auto feetScreen = WorldToScreen(player.position, view_matrix, screen_size);
+        auto headScreen = WorldToScreen(player.head_position, view_matrix, screen_size);
 
         if (!feetScreen.has_value() || !headScreen.has_value()) {
             continue;  // Player not on screen
@@ -619,7 +591,7 @@ void RenderEsp(const ImVec2& window_pos, const ImVec2& window_size) {
         ImU32 bg_color = IM_COL32(0, 0, 0, 100);
 
         if (g_esp_fake_chams) {
-            RenderFakeChams(draw, player, viewMatrix, screen_size, window_pos, height, main_color);
+            RenderFakeChams(draw, player, view_matrix, screen_size, window_pos, height, main_color);
         }
 
         // ESP Box
@@ -658,8 +630,8 @@ void RenderEsp(const ImVec2& window_pos, const ImVec2& window_size) {
 
                 if (it1 == player.bones.end() || it2 == player.bones.end()) continue;
 
-                auto screen1 = WorldToScreen(it1->second, viewMatrix, screen_size);
-                auto screen2 = WorldToScreen(it2->second, viewMatrix, screen_size);
+                auto screen1 = WorldToScreen(it1->second, view_matrix, screen_size);
+                auto screen2 = WorldToScreen(it2->second, view_matrix, screen_size);
 
                 if (!screen1.has_value() || !screen2.has_value()) continue;
 
@@ -712,7 +684,6 @@ void RenderEsp(const ImVec2& window_pos, const ImVec2& window_size) {
             draw->AddText(text_pos, text_color, weapon_name);
         }
     }
-    
 }
 
 } // namespace esp

@@ -62,28 +62,13 @@ void DrawPlayerArrow(ImDrawList* draw, ImVec2 pos, float yaw_deg, float local_ya
 
 } // namespace
 
-void DrawRadar(bool menu_visible) {
+// DrawRadar implementation updated to use passed arguments
+void DrawRadar(bool menu_visible, 
+               const std::vector<esp::EspPlayerData>& players,
+               const memory::Vec3& local_pos,
+               float local_yaw,
+               uint8_t local_team) {
     if (!g_radar_enabled) return;
-
-    if (!esp::g_esp_manager.isConnected()) return;
-
-    const auto& process_opt = esp::g_esp_manager.getProcess();
-    const auto& offsets_opt = esp::g_esp_manager.getOffsets();
-    if (!process_opt.has_value() || !offsets_opt.has_value()) return;
-
-    const auto& process = process_opt.value();
-    const auto& offsets = offsets_opt.value();
-
-    auto local_player_opt = memory::Player::localPlayer(process, offsets);
-    if (!local_player_opt.has_value()) return;
-
-    const auto& local_player = local_player_opt.value();
-    if (!local_player.isValid(process, offsets)) return;
-
-    memory::Vec3 local_pos = local_player.position(process, offsets);
-    memory::Vec2 view_angles = local_player.viewAngles(process, offsets);
-    uint8_t local_team = local_player.team(process, offsets);
-    float local_yaw = view_angles.y;
 
     float radar_half = g_radar_size * 0.5f;
     // Use saved position; default aligns with CS2 radar
@@ -98,14 +83,14 @@ void DrawRadar(bool menu_visible) {
     // Proportion: how many game units fit in the radar half-width
     float proportion = g_radar_range;
 
-    // Collect players
-    std::vector<RadarPlayer> players;
+    // Collect players for rendering
+    std::vector<RadarPlayer> render_players;
+    render_players.reserve(players.size());
 
-    // Use cached players from EspManager instead of re-scanning entities
-    for (const auto& player : esp::g_esp_manager.getPlayers()) {
+    // Use passed players list
+    for (const auto& player : players) {
         memory::Vec3 player_pos = player.position;
-        uint8_t player_team = player.is_enemy ? (local_team == 2 ? 3 : 2) : local_team; // Infer team from is_enemy if needed, but we have is_enemy flag directly
-        // Actually we just need to know if enemy or not for color
+        // In this context, is_enemy is pre-calculated by ESP manager based on local team
         bool is_enemy = player.is_enemy;
         int health = player.health;
         float player_yaw = player.rotation;
@@ -140,7 +125,7 @@ void DrawRadar(bool menu_visible) {
         rp.yaw = player_yaw;
         rp.is_enemy = is_enemy;
         rp.health = health;
-        players.push_back(rp);
+        render_players.push_back(rp);
     }
 
     // When menu is open: draggable ImGui window
@@ -176,7 +161,7 @@ void DrawRadar(bool menu_visible) {
             draw->AddLine(ImVec2(tl.x, center.y), ImVec2(br.x, center.y), IM_COL32(50, 50, 50, 100), 1.0f);
             draw->AddCircleFilled(center, 3.0f, IM_COL32(255, 255, 255, 220), 12);
 
-            for (const auto& rp : players) {
+            for (const auto& rp : render_players) {
                 ImVec2 pos(rp.screen_x, rp.screen_y);
                 ImU32 fill_color;
                 if (rp.is_enemy) {
@@ -203,7 +188,7 @@ void DrawRadar(bool menu_visible) {
         draw->AddLine(ImVec2(tl.x, center.y), ImVec2(br.x, center.y), IM_COL32(50, 50, 50, 100), 1.0f);
         draw->AddCircleFilled(center, 3.0f, IM_COL32(255, 255, 255, 220), 12);
 
-        for (const auto& rp : players) {
+        for (const auto& rp : render_players) {
             ImVec2 pos(rp.screen_x, rp.screen_y);
             ImU32 fill_color;
             if (rp.is_enemy) {

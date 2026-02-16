@@ -1,6 +1,7 @@
 #pragma once
 
 #include <array>
+#include <mutex>
 #include <cstdint>
 #include "../../memory/math.h"
 
@@ -10,10 +11,18 @@ class Aimbot {
 public:
     static Aimbot& Get();
 
+    // Legacy single-threaded update (calls both phases)
     void Update();
+
+    // Phase 1: Read game memory and compute aim target (background thread)
+    void ReadGameData();
+    // Phase 2: Apply cached mouse movement (background thread or render thread)
+    void ApplyAim();
+
     bool isActive() const { return active_; }
 
 private:
+    std::mutex mutex_;
     bool previous_button_state_ = false;
     bool active_ = false;
     float previous_aim_punch_x_ = 0.0f;
@@ -25,6 +34,11 @@ private:
     // Fractional mouse accumulation
     float mouse_remainder_x_ = 0.0f;
     float mouse_remainder_y_ = 0.0f;
+
+    // Cached aim result from ReadGameData()
+    bool has_aim_delta_ = false;
+    int32_t aim_delta_x_ = 0;
+    int32_t aim_delta_y_ = 0;
 };
 
 enum class AimbotKey : uint64_t {

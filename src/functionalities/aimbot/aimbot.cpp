@@ -240,6 +240,16 @@ Aimbot& Aimbot::Get() {
 }
 
 void Aimbot::Update() {
+    ReadGameData();
+    ApplyAim();
+}
+
+void Aimbot::ReadGameData() {
+    std::lock_guard<std::mutex> lock(mutex_);
+    has_aim_delta_ = false;
+    aim_delta_x_ = 0;
+    aim_delta_y_ = 0;
+
     if (!g_aimbot_enabled) {
         previous_button_state_ = false;
         active_ = false;
@@ -353,7 +363,7 @@ void Aimbot::Update() {
     memory::Vec2 target_angle = target.angle;
 
 
-    // === NORMAL AIM (mouse movement) ===
+    // === Compute mouse delta ===
     memory::Vec2 aim_angles = view_angles - target_angle;
     if (aim_angles.y < -180.0f) {
         aim_angles.y += 360.0f;
@@ -372,8 +382,6 @@ void Aimbot::Update() {
     float smooth = std::clamp(g_aimbot_smooth + 1.0f, 1.0f, 20.0f);
 
     // Convert angle delta to mouse counts using m_yaw/m_pitch
-    // angle_delta = mouse_counts * sensitivity * m_yaw
-    // mouse_counts = angle_delta / (sensitivity * m_yaw)
     float mouse_x = aim_angles.y / (sensitivity * kMYaw);
     float mouse_y = -aim_angles.x / (sensitivity * kMPitch);
 
@@ -392,11 +400,21 @@ void Aimbot::Update() {
     mouse_remainder_y_ = mouse_y - static_cast<float>(int_y);
 
     if (int_x != 0 || int_y != 0) {
-        auto mouse = platform::Mouse::Get();
-        if (mouse && mouse->IsValid()) {
-            platform::Vec2 move{static_cast<float>(int_x), static_cast<float>(int_y)};
-            mouse->MoveRel(move);
-        }
+        has_aim_delta_ = true;
+        aim_delta_x_ = int_x;
+        aim_delta_y_ = int_y;
+    }
+}
+
+void Aimbot::ApplyAim() {
+    std::lock_guard<std::mutex> lock(mutex_);
+    if (!has_aim_delta_) return;
+    has_aim_delta_ = false;
+
+    auto mouse = platform::Mouse::Get();
+    if (mouse && mouse->IsValid()) {
+        platform::Vec2 move{static_cast<float>(aim_delta_x_), static_cast<float>(aim_delta_y_)};
+        mouse->MoveRel(move);
     }
 }
 
